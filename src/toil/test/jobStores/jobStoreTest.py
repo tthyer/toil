@@ -124,11 +124,10 @@ class AbstractJobStoreTest(object):
             self.jobstore_resumed_noconfig.resume()
 
             # Requirements for jobs to be created.
-            self.arbitraryRequirements = {'memory': 1, 'disk': 2, 'cores': 1, 'preemptable': False}
             self.arbitraryJob = JobNode(command='command',
                                         jobStoreID=None,
                                         jobName='arbitrary', unitName=None,
-                                        requirements=self.arbitraryRequirements)
+                                        requirements={'memory': 1, 'disk': 2, 'cores': 1, 'preemptable': False})
 
             self.parentJobReqs = dict(memory=12, cores=34, disk=35, preemptable=True)
             self.childJobReqs1 = dict(memory=23, cores=45, disk=46, preemptable=True)

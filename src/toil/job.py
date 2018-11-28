@@ -1468,9 +1468,7 @@ class JobFunctionWrappingJob(FunctionWrappingJob):
     For example to wrap a function into a job we would call::
 
         Job.wrapJobFn(myJob, memory='100k', disk='1M', cores=0.1)
-
     """
-
     @property
     def fileStore(self):
         return self._fileStore

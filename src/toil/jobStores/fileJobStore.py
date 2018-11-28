@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2016 Regents of the University of California
+# Copyright (C) 2015-2018 Regents of the University of California
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# python 2/3 compatibility
 from __future__ import absolute_import
 from builtins import range
-
-# standard library
-from contextlib import contextmanager
 import logging
 import random
 import shutil
@@ -26,26 +21,21 @@ import re
 import tempfile
 import stat
 import errno
-import time
 import traceback
 import time
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
 from contextlib import contextmanager
-# toil and bd2k dependencies
+
+from toil import pickle
 from toil.fileStore import FileID
 from toil.lib.bioio import absSymPath
+from toil.jobGraph import JobGraph
 from toil.jobStores.abstractJobStore import (AbstractJobStore,
                                              NoSuchJobException,
                                              NoSuchFileException,
                                              JobStoreExistsException,
                                              NoSuchJobStoreException)
-from toil.jobGraph import JobGraph
 
-logger = logging.getLogger( __name__ )
+logger = logging.getLogger(__name__)
 
 
 class FileJobStore(AbstractJobStore):
@@ -60,7 +50,7 @@ class FileJobStore(AbstractJobStore):
     levels = 2
 
     # 10Mb RAM chunks when reading/writing files
-    BUFFER_SIZE = 10485760 # 10Mb
+    BUFFER_SIZE = 10485760  # 10Mb
 
     def __init__(self, path):
         """
@@ -522,7 +512,7 @@ class FileJobStore(AbstractJobStore):
         """
         Raises a NoSuchJobException if the jobStoreID does not exist.
         """
-        if not self.waitForExists(jobStoreID,30):
+        if not self.waitForExists(jobStoreID, 30):
             raise NoSuchJobException(jobStoreID)
 
     def _checkJobStoreFileID(self, jobStoreFileID):
@@ -546,7 +536,7 @@ class FileJobStore(AbstractJobStore):
                 try:
                     os.mkdir(tempDir)
                 except os.error:
-                    if not os.path.exists(tempDir): # In the case that a collision occurs and
+                    if not os.path.exists(tempDir):  # In the case that a collision occurs and
                         # it is created while we wait then we ignore
                         raise
         return tempDir

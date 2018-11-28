@@ -85,8 +85,7 @@ def nextChainableJobGraph(jobGraph, jobStore):
     # Load the successor jobGraph
     successorJobGraph = jobStore.load(successorJobNode.jobStoreID)
 
-    # Somewhat ugly, but check if job is a checkpoint job and quit if
-    # so
+    # Somewhat ugly, but check if job is a checkpoint job and quit if so
     if successorJobGraph.command.startswith("_toil "):
         #Load the job
         successorJob = Job._loadJob(successorJobGraph.command, jobStore)
@@ -137,7 +136,7 @@ def workerScript(jobStore, config, jobName, jobStoreID, redirectOutputToLogFile=
     ##########################################
     #Load the environment for the jobGraph
     ##########################################
-    
+
     #First load the environment for the jobGraph.
     with jobStore.readSharedFileStream("environment.pickle") as fileHandle:
         environment = safeUnpickleFromStream(fileHandle)
@@ -155,7 +154,7 @@ def workerScript(jobStore, config, jobName, jobStoreID, redirectOutputToLogFile=
     ##########################################
     #Setup the temporary directories.
     ##########################################
-        
+
     # Dir to put all this worker's temp files in.
     localWorkerTempDir = tempfile.mkdtemp(dir=toilWorkflowDir)
     os.chmod(localWorkerTempDir, 0o755)
@@ -209,14 +208,14 @@ def workerScript(jobStore, config, jobName, jobStoreID, redirectOutputToLogFile=
     statsDict = MagicExpando()
     statsDict.jobs = []
     statsDict.workers.logsToMaster = []
-    blockFn = lambda : True
+    blockFn = lambda: True
     listOfJobs = [jobName]
     try:
 
         #Put a message at the top of the log, just to make sure it's working.
         logger.info("---TOIL WORKER OUTPUT LOG---")
         sys.stdout.flush()
-        
+
         logProcessContext(config)
 
         ##########################################
@@ -234,7 +233,7 @@ def workerScript(jobStore, config, jobName, jobStoreID, redirectOutputToLogFile=
         if jobGraph.command == None:
             logger.debug("Wrapper has no user job to run.")
             # Cleanup jobs already finished
-            f = lambda jobs : [z for z in [[y for y in x if jobStore.exists(y.jobStoreID)] for x in jobs] if len(z) > 0]
+            f = lambda jobs: [z for z in [[y for y in x if jobStore.exists(y.jobStoreID)] for x in jobs] if len(z) > 0]
             jobGraph.stack = f(jobGraph.stack)
             jobGraph.services = f(jobGraph.services)
             logger.debug("Cleaned up any references to completed successor jobs")

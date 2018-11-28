@@ -268,55 +268,6 @@ class FileStore(with_metaclass(ABCMeta, object)):
         else:
             return os.path.join(self.localTempDir, filePath)
 
-    class _StateFile(object):
-        """
-        Utility class to read and write dill-ed state dictionaries from/to a file into a namespace.
-        """
-        def __init__(self, stateDict):
-            assert isinstance(stateDict, dict)
-            self.__dict__.update(stateDict)
-
-        @abstractclassmethod
-        @contextmanager
-        def open(cls, outer=None):
-            """
-            This is a context manager that state file and reads it into an object that is returned
-            to the user in the yield.
-
-            :param outer: Instance of the calling class (to use outer methods).
-            """
-            raise NotImplementedError()
-
-        @classmethod
-        def _load(cls, fileName):
-            """
-            Load the state of the cache from the state file
-
-            :param str fileName: Path to the cache state file.
-            :return: An instance of the state as a namespace.
-            :rtype: _StateFile
-            """
-            # Read the value from the cache state file then initialize and instance of
-            # _CacheState with it.
-            with open(fileName, 'rb') as fH:
-                infoDict = dill.load(fH)
-            return cls(infoDict)
-
-        def write(self, fileName):
-            """
-            Write the current state into a temporary file then atomically rename it to the main
-            state file.
-
-            :param str fileName: Path to the state file.
-            """
-            with open(fileName + '.tmp', 'wb') as fH:
-                # Based on answer by user "Mark" at:
-                # http://stackoverflow.com/questions/2709800/how-to-pickle-yourself
-                # We can't pickle nested classes. So we have to pickle the variables of the class
-                # If we ever change this, we need to ensure it doesn't break FileID
-                dill.dump(self.__dict__, fH)
-            os.rename(fileName + '.tmp', fileName)
-
     # Methods related to the deferred function logic
     @abstractclassmethod
     def findAndHandleDeadJobs(cls, nodeInfo, batchSystemShutdown=False):
@@ -426,7 +377,6 @@ class CachingFileStore(FileStore):
     A cache-enabled file store that attempts to use hard-links and asynchronous job store writes to
     reduce I/O between, and during jobs.
     """
-
     def __init__(self, jobStore, jobGraph, localTempDir, inputBlockFn):
         super(CachingFileStore, self).__init__(jobStore, jobGraph, localTempDir, inputBlockFn)
         # Variables related to asynchronous writes.
@@ -857,9 +807,7 @@ class CachingFileStore(FileStore):
             logger.debug("CACHE: Released lock")
 
     def _setupCache(self):
-        """
-        Setup the cache based on the provided values for localCacheDir.
-        """
+        """Setup the cache based on the provided values for localCacheDir."""
         # we first check whether the cache directory exists. If it doesn't, create it.
         if not os.path.exists(self.localCacheDir):
             # Create a temporary directory as this worker's private cache. If all goes well, it
@@ -936,16 +884,13 @@ class CachingFileStore(FileStore):
         :return: outCachedFile: A path to the hashed file in localCacheDir
         :rtype: str
         """
-        
         base64Text = base64.urlsafe_b64encode(jobStoreFileID.encode('utf-8')).decode('utf-8')
         
         outCachedFile = os.path.join(self.localCacheDir, base64Text)
         return outCachedFile
 
     def _fileIsCached(self, jobStoreFileID):
-        """
-        Is the file identified by jobStoreFileID in cache or not.
-        """
+        """Is the file identified by jobStoreFileID in cache or not."""
         return os.path.exists(self.encodedFileID(jobStoreFileID))
 
     def decodedFileID(self, cachedFilePath):
@@ -1219,12 +1164,46 @@ class CachingFileStore(FileStore):
             cacheInfo.sigmaJob -= jobReqs
             # assert cacheInfo.isBalanced() # commenting this out for now. God speed
 
-    class _CacheState(FileStore._StateFile):
+    class _CacheState(object):
         """
         Utility class to read and write the cache lock file. Also for checking whether the
         caching equation is balanced or not.  It extends the _StateFile class to add other cache
         related functions.
         """
+        def __init__(self, stateDict):
+            assert isinstance(stateDict, dict)
+            self.__dict__.update(stateDict)
+
+        @classmethod
+        def _load(cls, fileName):
+            """
+            Load the state of the cache from the state file
+
+            :param str fileName: Path to the cache state file.
+            :return: An instance of the state as a namespace.
+            :rtype: _StateFile
+            """
+            # Read the value from the cache state file then initialize and instance of
+            # _CacheState with it.
+            with open(fileName, 'rb') as fH:
+                infoDict = dill.load(fH)
+            return cls(infoDict)
+
+        def write(self, fileName):
+            """
+            Write the current state into a temporary file then atomically rename it to the main
+            state file.
+
+            :param str fileName: Path to the state file.
+            """
+            with open(fileName + '.tmp', 'wb') as fH:
+                # Based on answer by user "Mark" at:
+                # http://stackoverflow.com/questions/2709800/how-to-pickle-yourself
+                # We can't pickle nested classes. So we have to pickle the variables of the class
+                # If we ever change this, we need to ensure it doesn't break FileID
+                dill.dump(self.__dict__, fH)
+            os.rename(fileName + '.tmp', fileName)
+
         @classmethod
         @contextmanager
         def open(cls, outer=None):
@@ -1372,7 +1351,6 @@ class CachingFileStore(FileStore):
         Represents the placeholder file that harbinges the arrival of a local copy of a file in
         the job store.
         """
-
         def __init__(self, fileStore, fileStoreID=None, cachedFileName=None):
             """
             Returns the harbinger file name for a cached file, or for a job store ID
@@ -1496,7 +1474,6 @@ class CachingFileStore(FileStore):
         until the writing threads have finished and the input blockFn has stopped \
         blocking.
         """
-
         def asyncUpdate():
             try:
                 # Wait till all file writes have completed

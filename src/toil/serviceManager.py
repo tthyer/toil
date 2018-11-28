@@ -40,19 +40,19 @@ class ServiceManager( object ):
 
         self.jobGraphsWithServicesBeingStarted = set()
 
-        self._terminate = Event() # This is used to terminate the thread associated
+        self._terminate = Event()  # This is used to terminate the thread associated
         # with the service manager
 
-        self._jobGraphsWithServicesToStart = Queue() # This is the input queue of
+        self._jobGraphsWithServicesToStart = Queue()  # This is the input queue of
         # jobGraphs that have services that need to be started
 
-        self._jobGraphsWithServicesThatHaveStarted = Queue() # This is the output queue
+        self._jobGraphsWithServicesThatHaveStarted = Queue()  # This is the output queue
         # of jobGraphs that have services that are already started
 
-        self._serviceJobGraphsToStart = Queue() # This is the queue of services for the
+        self._serviceJobGraphsToStart = Queue()  # This is the queue of services for the
         # batch system to start
 
-        self.jobsIssuedToServiceManager = 0 # The number of jobs the service manager
+        self.jobsIssuedToServiceManager = 0  # The number of jobs the service manager
         # is scheduling
 
         # Start a thread that starts the services of jobGraphs in the
@@ -65,9 +65,7 @@ class ServiceManager( object ):
                                            self.jobStore))
         
     def start(self): 
-        """
-        Start the service scheduling thread.
-        """
+        """Start the service scheduling thread."""
         self._serviceStarter.start()
 
     def scheduleServices(self, jobGraph):

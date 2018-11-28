@@ -25,6 +25,7 @@ import logging
 import os
 import shutil
 import sys
+from six.moves.urllib.request import urlopen
 from collections import namedtuple
 from contextlib import closing
 from io import BytesIO
@@ -35,8 +36,6 @@ from zipfile import ZipFile
 
 # Python 3 compatibility imports
 from toil.lib.retry import retry
-from six.moves.urllib.request import urlopen
-
 from toil.lib.memoize import strict_bool
 from toil.lib.iterables import concat
 

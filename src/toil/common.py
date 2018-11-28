@@ -709,9 +709,7 @@ class Toil(object):
 
     # noinspection PyUnusedLocal
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        Clean up after a workflow invocation. Depending on the configuration, delete the job store.
-        """
+        """Clean up after a workflow invocation. Depending on the configuration, delete the job store."""
         try:
             if (exc_type is not None and self.config.clean == "onError" or
                             exc_type is None and self.config.clean == "onSuccess" or
@@ -808,7 +806,7 @@ class Toil(object):
         else:
             self._provisioner = clusterFactory(provisioner=self.config.provisioner,
                                                clusterName=None,
-                                               zone=None, # read from instance meta-data
+                                               zone=None,  # read from instance meta-data
                                                nodeStorage=self.config.nodeStorage,
                                                sseKey=self.config.sseKey)
             self._provisioner.setAutoscaledNodeTypes(self.config.nodeTypes)
@@ -1299,9 +1297,7 @@ def fC(minValue, maxValue=None):
 
 
 def cacheDirName(workflowID):
-    """
-    :return: Name of the cache directory.
-    """
+    """Name of the cache directory."""
     return 'cache-' + workflowID
 
 
@@ -1346,6 +1342,7 @@ def getFileSystemSize(dirPath):
     freeSpace = diskStats.f_frsize * diskStats.f_bavail
     diskSize = diskStats.f_frsize * diskStats.f_blocks
     return freeSpace, diskSize
+
 
 def safeUnpickleFromStream(stream):
     string = stream.read()

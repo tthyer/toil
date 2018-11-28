@@ -71,7 +71,7 @@ class JobGraph(JobNode):
         
         # A jobStoreFileID of the log file for a job. This will be none unless the job failed and
         #  the logging has been captured to be reported on the leader.
-        self.logJobStoreFileID = logJobStoreFileID 
+        self.logJobStoreFileID = logJobStoreFileID
         
         # A list of lists of service jobs to run. Each sub list is a list of service jobs
         # descriptions, each of which is stored as a 6-tuple of the form (jobStoreId, memory,
@@ -99,9 +99,6 @@ class JobGraph(JobNode):
         # Names of jobs that were run as part of this job's invocation, starting with
         # this job
         self.chainedJobs = chainedJobs
-
-    def __hash__(self):
-        return hash(self.jobStoreID)
 
     def setupJobAfterFailure(self, config):
         """
@@ -171,9 +168,7 @@ class JobGraph(JobNode):
         return successorsDeleted
 
     def getLogFileHandle(self, jobStore):
-        """
-        Returns a context manager that yields a file handle to the log file
-        """
+        """Returns a context manager that yields a file handle to the log file."""
         return jobStore.readFileStream(self.logJobStoreFileID)
 
     @classmethod
@@ -192,7 +187,8 @@ class JobGraph(JobNode):
                    remainingRetryCount=tryCount,
                    predecessorNumber=jobNode.predecessorNumber,
                    unitName=jobNode.unitName, jobName=jobNode.jobName,
-                   **jobNode._requirements)
+                   memory=jobNode.memory, cores=jobNode.cores,
+                   disk=jobNode.disk, preemptable=jobNode.preemptable)
 
     def __eq__(self, other):
         return (
