@@ -82,6 +82,8 @@ from toil.job import Job, Promise
 from toil.common import Config, Toil, addOptions
 from toil.version import baseVersion
 
+import traceback
+
 # Define internal jobs we should avoid submitting to batch systems and logging
 CWL_INTERNAL_JOBS = ("CWLJobWrapper",
                      "CWLWorkflow",
@@ -476,6 +478,8 @@ class ToilPathMapper(PathMapper):
               basedir: str,
               copy: bool = False,
               staged: bool = False) -> None:
+        cwllogger.debug(f'Visit object: {obj}')
+        traceback.print_stack()
         tgt = convert_pathsep_to_unix(os.path.join(stagedir, obj["basename"]))
         if obj["location"] in self._pathmap:
             return

@@ -176,6 +176,9 @@ class KubernetesBatchSystem(BatchSystemLocalSupport):
         # TODO: have some way to specify this (env var?)!
         self.awsSecretName = os.environ.get("TOIL_AWS_SECRET_NAME", None)
 
+        # Get the name of the Synapse secret, if any, to mount as a volume
+        self.synapseSecretName = os.environ.get("SYNAPSE_SECRET_NAME", None)
+
         # Set this to True to enable the experimental wait-for-job-update code
         self.enableWatching = True
 
@@ -373,6 +376,19 @@ class KubernetesBatchSystem(BatchSystemLocalSupport):
                 volumes.append(secret_volume)
                 secret_volume_mount = kubernetes.client.V1VolumeMount(mount_path='/root/.aws', name=secret_volume_name)
                 mounts.append(secret_volume_mount)
+
+            if self.synapseSecretName is not None:
+                synapse_secret_volume_name = 'synapse-secret'
+                synapse_secret_volume_source = kubernetes.client.V1SecretVolumeSource(secret_name=self.synapseSecretName)
+                synapse_volume = kubernetes.client.V1Volume(name=synapse_secret_volume_name,
+                                                           secret=synapse_secret_volume_source)
+                volumes.append(synapse_volume)
+                # TODO handle setting mount_path (optional)
+                synapse_volume_mount = kubernetes.client.V1VolumeMount(
+                    mount_path='/tmp/.synapseConfig',
+                    name=synapse_secret_volume_name,
+                    sub_path='.synapseConfig')
+                mounts.append(synapse_volume_mount)
 
             # Make a container definition
             container = kubernetes.client.V1Container(command=['_toil_kubernetes_executor', encodedJob],
